@@ -5,6 +5,7 @@ const newTodoForm = document.querySelector(".new-todo-form");
 newTodoForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(event.target);
+
   fetch("/api/todos", {
     method: "POST",
     headers: {
@@ -20,30 +21,7 @@ newTodoForm.addEventListener("submit", (event) => {
     });
 });
 
-const getTodos = () => {
-  todoContainer.innerText = "";
-
-  fetch("/api/todos")
-    .then((res) => res.json())
-    .then((todos) => {
-      for (let todo of todos) {
-        todoContainer.append(createTodoElement(todo));
-      }
-    });
-};
-
 const createTodoElement = (todo) => {
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "X";
-  deleteBtn.className = "delete";
-  deleteBtn.addEventListener("click", () => {
-    fetch(`/api/todos/${todo.id}`, {
-      method: "DELETE",
-    }).then(() => {
-      getTodos();
-    });
-  });
-
   const todoForm = document.createElement("form");
   todoForm.className = "todo-form";
   const textInput = document.createElement("input");
@@ -54,6 +32,7 @@ const createTodoElement = (todo) => {
   todoForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
+
     fetch(`/api/todos/${todo.id}`, {
       method: "PATCH",
       headers: {
@@ -77,9 +56,27 @@ const createTodoElement = (todo) => {
 
   const todoLi = document.createElement("li");
   todoLi.className = "todo";
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "X";
+  deleteBtn.className = "delete";
+  deleteBtn.addEventListener("click", () => {
+    fetch(`/api/todos/${todo.id}`, {
+      method: "DELETE",
+    }).then(() => {
+      todoLi.remove();
+    });
+  });
+
   todoLi.append(deleteBtn, todoText);
 
   return todoLi;
 };
 
-getTodos();
+fetch("/api/todos")
+  .then((res) => res.json())
+  .then((todos) => {
+    for (let todo of todos) {
+      todoContainer.append(createTodoElement(todo));
+    }
+  });
